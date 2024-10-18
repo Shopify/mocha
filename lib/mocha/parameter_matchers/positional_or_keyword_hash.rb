@@ -15,7 +15,14 @@ module Mocha
       def matches?(available_parameters)
         parameter, is_last_parameter = extract_parameter(available_parameters)
 
-        return false unless HasEntries.new(@value, exact: true).matches?([parameter])
+        unless HasEntries.new(@value, exact: true).matches?([parameter])
+          return unless HasEntries.new(@value, exact: false).matches?([parameter])
+
+          warn(
+            "You need to pass the exact list of positional and keyword arguments to Mocha's `.with(...)`",
+            category: :deprecated
+          )
+        end
 
         if is_last_parameter && !same_type_of_hash?(parameter, @value)
           return false if Mocha.configuration.strict_keyword_argument_matching?
